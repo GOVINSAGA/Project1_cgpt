@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Project1_cgpt.Data;
+
 namespace Project1_cgpt
 {
     public class Program
@@ -11,6 +14,12 @@ namespace Project1_cgpt
             // Add Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            // ADD THIS SECTION
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection")
+                ));
 
             var app = builder.Build();
 
