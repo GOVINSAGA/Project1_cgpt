@@ -40,7 +40,7 @@ namespace Project1_cgpt.Controllers
             {
                 Name = dto.Name,
                 UserName = dto.UserName,
-                Password = dto.Password,
+                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Dob = dto.Dob,
                 MobileNo = dto.MobileNo,
                 Email = dto.Email,
