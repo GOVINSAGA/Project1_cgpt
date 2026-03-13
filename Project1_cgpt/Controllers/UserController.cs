@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Project1_cgpt.Data;
 using Project1_cgpt.DTOs;
 using Project1_cgpt.Models;
-
+using BCrypt.Net;
 namespace Project1_cgpt.Controllers
 {
     [ApiController]
@@ -51,6 +51,28 @@ namespace Project1_cgpt.Controllers
             _context.SaveChanges();
 
             return Ok("User registered successfully");
+        }
+
+        [HttpPost("login")]
+        public IActionResult Login(LoginUserDTO dto)
+        {
+            var user = _context.Users.FirstOrDefault(u =>
+                u.UserName == dto.UserNameOrEmail ||
+                u.Email == dto.UserNameOrEmail);
+
+            if (user == null)
+            {
+                return BadRequest("Invalid username/email");
+            }
+
+            bool passwordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
+
+            if (!passwordValid)
+            {
+                return BadRequest("Invalid password");
+            }
+
+            return Ok("Login successful");
         }
     }
 }
