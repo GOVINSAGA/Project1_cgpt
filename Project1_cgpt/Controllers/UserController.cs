@@ -1,92 +1,49 @@
+using BCrypt.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Project1_cgpt.Data;
 using Project1_cgpt.DTOs;
 using Project1_cgpt.Models;
-using BCrypt.Net;
+using Project1_cgpt.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.AspNetCore.Authorization;
+
 namespace Project1_cgpt.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
 
-        public UserController(AppDbContext context, IConfiguration configuration)
+        public UserController(IUserService userService, IConfiguration configuration)
         {
-            _context = context;
+            _userService = userService;
             _configuration = configuration;
         }
 
         [HttpPost("register")]
         public IActionResult Register(RegisterUserDTO dto)
         {
-            var exists = _context.Users.Any(u =>
-                u.UserName == dto.UserName ||
-                u.Email == dto.Email ||
-                u.MobileNo == dto.MobileNo);
-
-            if (exists)
-            {
-                return BadRequest("User already exists");
-            }
-
-            int age = DateTime.Today.Year - dto.Dob.Year;
-
-            if (age < 18)
-            {
-                return BadRequest("User must be at least 18 years old");
-            }
-
-            var user = new User
-            {
-                Name = dto.Name,
-                UserName = dto.UserName,
-                Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                Dob = dto.Dob,
-                MobileNo = dto.MobileNo,
-                Email = dto.Email,
-                Address = dto.Address
-            };
-
-            _context.Users.Add(user);
-            _context.SaveChanges();
-
-            return Ok("User registered successfully");
+            var result = _userService.Register(dto);
+            return Ok(result);
         }
 
         [HttpPost("login")]
         public IActionResult Login(LoginUserDTO dto)
         {
-            var user = _context.Users.FirstOrDefault(u =>
-                u.UserName == dto.UserNameOrEmail ||
-                u.Email == dto.UserNameOrEmail);
-
-            if (user == null)
-            {
-                return BadRequest("Invalid username/email");
-            }
-
-            bool passwordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
-
-            if (!passwordValid)
-            {
-                return BadRequest("Invalid password");
-            }
+            var username = _userService.Login(dto);
 
             var claims = new[]
             {
-        new Claim(ClaimTypes.Name, user.UserName),
-        new Claim(ClaimTypes.Email, user.Email)
+        new Claim(ClaimTypes.Name, username)
     };
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")));
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -100,30 +57,21 @@ namespace Project1_cgpt.Controllers
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return Ok(new { token = tokenString });
+            return Ok(new
+            {
+                token = tokenString
+            });
         }
 
         [Authorize]
         [HttpGet("profile")]
-        public IActionResult GetProfile()
+        public IActionResult Profile()
         {
-            var username = User.Identity.Name;
+            var username = User.Identity?.Name;
 
-            var user = _context.Users.FirstOrDefault(u => u.UserName == username);
+            var user = _userService.GetProfile(username);
 
-            if (user == null)
-            {
-                return NotFound("User not found");
-            }
-
-            return Ok(new
-            {
-                user.Name,
-                user.UserName,
-                user.Email,
-                user.MobileNo,
-                user.Address
-            });
+            return Ok(user);
         }
     }
 }

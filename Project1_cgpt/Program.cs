@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Project1_cgpt.Data;
 using System.Text;
+using Project1_cgpt.Services;
+
 
 namespace Project1_cgpt
 {
@@ -74,6 +76,9 @@ namespace Project1_cgpt
                         Encoding.UTF8.GetBytes(jwtKey))
                 };
             });
+
+            builder.Services.AddScoped<IUserService, UserService>();
+
             var app = builder.Build();
 
             app.UseMiddleware<Project1_cgpt.Middleware.ExceptionMiddleware>();
