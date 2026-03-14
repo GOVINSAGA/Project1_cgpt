@@ -5,9 +5,11 @@ namespace Project1_cgpt.DTOs
     public class RegisterUserDTO
     {
         [Required]
+        [StringLength(50)]
         public required string Name { get; set; }
 
         [Required]
+        [StringLength(30)]
         public required string UserName { get; set; }
 
         [Required]
@@ -18,13 +20,15 @@ namespace Project1_cgpt.DTOs
         public DateTime Dob { get; set; }
 
         [Required]
-        [RegularExpression(@"^[0-9]{10}$")]
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "Mobile number must be 10 digits")]
         public required string MobileNo { get; set; }
 
         [Required]
         [EmailAddress]
         public required string Email { get; set; }
 
-        public string? Address { get; set; }
+        [Required]
+        [StringLength(200)]
+        public required string Address { get; set; }
     }
 }
