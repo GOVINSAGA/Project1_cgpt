@@ -1,31 +1,28 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Project1_cgpt.Models
 {
+    [Index(nameof(UserName), IsUnique = true)]
+    [Index(nameof(Email), IsUnique = true)]
+    [Index(nameof(MobileNo), IsUnique = true)]
     public class User
     {
         public int Id { get; set; }
 
-        [Required]
         public required string Name { get; set; }
 
-        [Required]
         public required string UserName { get; set; }
 
-        [Required]
         public required string Password { get; set; }
 
-        [Required]
         public DateTime Dob { get; set; }
 
-        [Required]
-        [RegularExpression(@"^[0-9]{10}$")]
         public required string MobileNo { get; set; }
 
-        [Required]
-        [EmailAddress]
         public required string Email { get; set; }
 
-        public string? Address { get; set; }
+        public required string Address { get; set; }
     }
 }
