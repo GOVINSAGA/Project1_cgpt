@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 namespace Project1_cgpt.Controllers
 {
     [ApiController]
@@ -79,13 +80,13 @@ namespace Project1_cgpt.Controllers
             }
 
             var claims = new[]
-{
-    new Claim(ClaimTypes.Name, user.UserName),
-    new Claim(ClaimTypes.Email, user.Email)
-};
+            {
+        new Claim(ClaimTypes.Name, user.UserName),
+        new Claim(ClaimTypes.Email, user.Email)
+    };
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+                Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")));
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -99,9 +100,29 @@ namespace Project1_cgpt.Controllers
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
+            return Ok(new { token = tokenString });
+        }
+
+        [Authorize]
+        [HttpGet("profile")]
+        public IActionResult GetProfile()
+        {
+            var username = User.Identity.Name;
+
+            var user = _context.Users.FirstOrDefault(u => u.UserName == username);
+
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
+
             return Ok(new
             {
-                token = tokenString
+                user.Name,
+                user.UserName,
+                user.Email,
+                user.MobileNo,
+                user.Address
             });
         }
     }

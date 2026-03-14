@@ -1,7 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using Project1_cgpt.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Project1_cgpt.Data;
 using System.Text;
 
 namespace Project1_cgpt
@@ -16,14 +17,41 @@ namespace Project1_cgpt
 
             // Add Swagger
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter JWT token like: Bearer {your token}"
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
 
             // ADD THIS SECTION
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")
                 ));
-            var jwtKey = builder.Configuration["Jwt:Key"];
+            var jwtKey = builder.Configuration["Jwt:Key"] 
+                ?? throw new InvalidOperationException("JWT Key is not configured in appsettings.json");
 
             builder.Services.AddAuthentication(options =>
             {
