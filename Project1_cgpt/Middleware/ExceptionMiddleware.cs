@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Text.Json;
-
+using Project1_cgpt.Exceptions;
 namespace Project1_cgpt.Middleware
 {
     public class ExceptionMiddleware
@@ -19,20 +19,26 @@ namespace Project1_cgpt.Middleware
             {
                 await _next(context);
             }
+
+            catch (AuthenticationException ex)
+            {
+                await HandleExceptionAsync(context, ex.Message, StatusCodes.Status401Unauthorized);
+            }
             catch (DbUpdateException)
             {
-                await HandleExceptionAsync(context, "Duplicate value detected.");
+                await HandleExceptionAsync(context, "Duplicate value detected.", StatusCodes.Status400BadRequest);
             }
+
             catch (Exception)
             {
-                await HandleExceptionAsync(context, "Internal server error.");
+                await HandleExceptionAsync(context, "Internal server error.", StatusCodes.Status500InternalServerError);
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext context, string message)
+        private static Task HandleExceptionAsync(HttpContext context, string message, int statusCode)
         {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            context.Response.StatusCode = statusCode;
 
             var result = JsonSerializer.Serialize(new
             {

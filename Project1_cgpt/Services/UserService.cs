@@ -2,7 +2,7 @@
 using Project1_cgpt.Data;
 using Project1_cgpt.DTOs;
 using Project1_cgpt.Models;
-
+using Project1_cgpt.Exceptions;
 namespace Project1_cgpt.Services
 {
     public class UserService : IUserService
@@ -53,12 +53,12 @@ namespace Project1_cgpt.Services
                 u.Email == dto.UserNameOrEmail);
 
             if (user == null)
-                throw new Exception("Invalid username/email");
+                throw new AuthenticationException("Invalid username or password");
 
             bool passwordValid = BCrypt.Net.BCrypt.Verify(dto.Password, user.Password);
 
             if (!passwordValid)
-                throw new Exception("Invalid password");
+                throw new AuthenticationException("Invalid username or password");
 
             return user.UserName;
         }

@@ -5,11 +5,12 @@ using Microsoft.IdentityModel.Tokens;
 using Project1_cgpt.Data;
 using Project1_cgpt.DTOs;
 using Project1_cgpt.Models;
+using Project1_cgpt.Responses;
 using Project1_cgpt.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
+using Project1_cgpt.Exceptions;
 namespace Project1_cgpt.Controllers
 {
     [ApiController]
@@ -29,7 +30,7 @@ namespace Project1_cgpt.Controllers
         public IActionResult Register(RegisterUserDTO dto)
         {
             var result = _userService.Register(dto);
-            return Ok(result);
+            return Ok(new ApiResponse<string>(true, "User registered successfully"));
         }
 
         [HttpPost("login")]
@@ -57,21 +58,26 @@ namespace Project1_cgpt.Controllers
 
             var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return Ok(new
-            {
-                token = tokenString
-            });
+            return Ok(new ApiResponse<object>(
+                true,
+                "Login successful",
+                 new { token = tokenString }
+            ));
         }
 
         [Authorize]
         [HttpGet("profile")]
         public IActionResult Profile()
         {
-            var username = User.Identity?.Name;
+            var username = User.Identity?.Name ?? throw new AuthenticationException("Invalid token");
 
             var user = _userService.GetProfile(username);
 
-            return Ok(user);
+            return Ok(new ApiResponse<object>(
+                 true,
+                 "User profile fetched successfully",
+                  user
+               ));
         }
     }
 }
