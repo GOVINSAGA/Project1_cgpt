@@ -76,6 +76,8 @@ namespace Project1_cgpt
             });
             var app = builder.Build();
 
+            app.UseMiddleware<Project1_cgpt.Middleware.ExceptionMiddleware>();
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
