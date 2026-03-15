@@ -63,14 +63,21 @@ namespace Project1_cgpt.Services
             return user.UserName;
         }
 
-        public User GetProfile(string username)
+        public ProfileResponseDTO GetProfile(string username)
         {
             var user = _context.Users.FirstOrDefault(u => u.UserName == username);
 
             if (user == null)
                 throw new Exception("User not found");
 
-            return user;
+            return new ProfileResponseDTO
+            {
+                Name = user.Name,
+                UserName = user.UserName,
+                Email = user.Email,
+                MobileNo = user.MobileNo,
+                Address = user.Address
+            };
         }
     }
 }

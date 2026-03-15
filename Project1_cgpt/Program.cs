@@ -79,9 +79,22 @@ namespace Project1_cgpt
 
             builder.Services.AddScoped<IUserService, UserService>();
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngular",
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:4200")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
             var app = builder.Build();
 
             app.UseMiddleware<Project1_cgpt.Middleware.ExceptionMiddleware>();
+
+            app.UseCors("AllowAngular");
 
             if (app.Environment.IsDevelopment())
             {

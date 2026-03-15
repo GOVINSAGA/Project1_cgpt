@@ -71,13 +71,13 @@ namespace Project1_cgpt.Controllers
         {
             var username = User.Identity?.Name ?? throw new AuthenticationException("Invalid token");
 
-            var user = _userService.GetProfile(username);
+            var userProfile = _userService.GetProfile(username);
 
             return Ok(new ApiResponse<object>(
-                 true,
-                 "User profile fetched successfully",
-                  user
-               ));
+                true,
+                "User profile fetched successfully",
+                userProfile
+            ));
         }
     }
 }
