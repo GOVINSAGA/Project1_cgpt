@@ -1,0 +1,27 @@
+<h2>User Registration</h2>
+
+<form (ngSubmit)="register()">
+
+  <label>Name</label><br>
+  <input type="text" [(ngModel)]="user.name" name="name"><br><br>
+
+  <label>Username</label><br>
+  <input type="text" [(ngModel)]="user.userName" name="userName"><br><br>
+
+  <label>Password</label><br>
+  <input type="password" [(ngModel)]="user.password" name="password"><br><br>
+
+  <label>Mobile</label><br>
+  <input type="text" [(ngModel)]="user.mobileNo" name="mobileNo"><br><br>
+
+  <label>DOB</label><br>
+  <input type="date" [(ngModel)]="user.dob" name="dob"><br><br>
+
+  <label>Email</label><br>
+  <input type="email" [(ngModel)]="user.email" name="email"><br><br>
+
+  <label>Address</label><br>
+  <input type="text" [(ngModel)]="user.address" name="address"><br><br>
+  <button type="submit">Register</button>
+
+</form>
