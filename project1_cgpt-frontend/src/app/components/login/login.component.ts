@@ -5,39 +5,38 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-login',
   standalone: true,
   imports: [FormsModule, CommonModule],
-  templateUrl: './register.component.html'
+  templateUrl: './login.component.html'
 })
-export class RegisterComponent {
+export class LoginComponent {
 
-  user = {
-    name: '',
-    userName: '',
-    password: '',
-    mobileNo: '',
-    dob: '',
-    email: '',
-    address: ''
+  loginData = {
+    userNameOrEmail: '',
+    password: ''
   };
 
   constructor(private authService: AuthService, private router: Router) { }
 
-  register() {
+  onSubmit() {
 
-    this.authService.register(this.user).subscribe({
+    this.authService.login(this.loginData).subscribe({
 
       next: (response: any) => {
 
-        alert("Registration Successful");
+        const token = response.data.token;
 
-        this.router.navigate(['/login']);
+        this.authService.saveToken(token);
+
+        alert("Login Successful");
+
+        this.router.navigate(['/profile']);
       },
 
       error: (error: any) => {
+        alert("Invalid credentials");
         console.error(error);
-        alert("Registration failed");
       }
 
     });
